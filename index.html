@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="레퍼런스를 따라 코드로 만든 가상 제품 광고 모션그래픽 35편">
+<style>html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>모션 연습장</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* 상영관 한 가지 톤(어두운 화면 고정). 위: 상영 중인 쇼릴 + 반응하는 제목 / 가운데: 숫자, 쇼릴 벽 / 아래: 만드는 법 */
+:root{
+  color-scheme:dark;
+  --bg:#0A0B10; --bg2:#11131A; --bg3:#181B24; --ink:#F3F2EE; --muted:#8C92A3; --line:#252935;
+  --accent:#5B6CFF; --accent2:#9AA6FF; --orig:#FF8C5E; --synth:#4FD1A5;
+  --f-display:"Black Han Sans","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  --gut:max(16px,env(safe-area-inset-left,0px));
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;overflow-x:hidden}
+a{color:var(--accent2)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent2);outline-offset:3px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+h2.sec{font-family:var(--f-display);font-weight:400;font-size:clamp(32px,5.2vw,64px);line-height:1;margin:6px 0 0;letter-spacing:-.01em;text-wrap:balance}
+
+/* ── 상단 바 */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:rgba(10,11,16,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:10px}
+.logo{font-family:var(--f-display);font-size:20px;letter-spacing:.01em;text-decoration:none;color:var(--ink);display:flex;align-items:center;gap:8px}
+.rec{width:9px;height:9px;border-radius:50%;background:var(--orig);box-shadow:0 0 0 3px rgba(255,140,94,.18);animation:blink 1.6s steps(1) infinite}
+@keyframes blink{50%{opacity:.25}}
+.nav-links{display:flex;gap:6px;flex-wrap:wrap}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:13px;padding:5px 10px;border-radius:999px}
+.nav-links a:hover{color:var(--ink);background:var(--bg3)}
+
+/* ── 히어로: 상영 중인 쇼릴 */
+.hero{position:relative;padding-block:28px 12px}
+.stage{position:relative;border-radius:10px;overflow:hidden;background:#000;aspect-ratio:16/9;max-width:100%;max-height:74vh;margin:0 auto;width:100%}
+.stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.92;transition:opacity .35s}
+.stage.swap video{opacity:0}
+.stage::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,11,16,0) 45%,rgba(10,11,16,.86) 100%);pointer-events:none}
+.corner{position:absolute;z-index:2;font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;color:rgba(243,242,238,.82);padding:12px 14px;display:flex;gap:10px;align-items:center}
+.corner.tl{top:0;left:0}.corner.tr{top:0;right:0}
+.corner.tl::before,.corner.tr::after{content:"";width:14px;height:14px;border:1.5px solid rgba(243,242,238,.6)}
+.corner.tl::before{border-right:0;border-bottom:0}.corner.tr::after{border-left:0;border-bottom:0}
+.hero-copy{position:absolute;z-index:3;left:0;right:0;bottom:0;padding:clamp(16px,3vw,36px);display:grid;gap:10px;pointer-events:none}
+.title{font-family:var(--f-display);font-weight:400;font-size:clamp(56px,12vw,176px);line-height:.9;margin:0;letter-spacing:-.02em;display:flex;flex-wrap:wrap;pointer-events:auto;user-select:none}
+.title .g{display:inline-block;will-change:transform;transition:color .2s}
+.title .sp{width:.28em}
+.tagline{font-size:clamp(15px,1.8vw,20px);margin:0;max-width:40ch;text-wrap:balance;color:rgba(243,242,238,.92)}
+.now{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;pointer-events:auto}
+.now b{font-family:var(--f-display);font-weight:400;font-size:20px}
+.now .mono{font-size:12px;color:rgba(243,242,238,.7)}
+.btn{border:1px solid rgba(243,242,238,.28);background:rgba(10,11,16,.45);padding:7px 14px;border-radius:999px;cursor:pointer;text-decoration:none;color:var(--ink);font-size:13px;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--ink)}
+.btn.solid{background:var(--accent);border-color:var(--accent);color:#fff}
+.scrub{position:relative;height:28px;margin-top:10px;display:flex;align-items:flex-end;gap:2px}
+.scrub i{flex:1;background:var(--line);height:8px;border-radius:1px;transition:background .2s,height .2s}
+.scrub i.on{background:var(--accent);height:14px}
+.scrub i.cur{background:var(--ink);height:22px}
+.hero-mobile{display:none}
+@media (max-width:640px){
+  .stage{aspect-ratio:4/5}
+  .hero-copy .tagline{display:none}
+  .hero-mobile{display:block;margin:12px 0 0;color:var(--muted)}
+}
+
+/* ── 숫자 */
+.figures{padding-block:56px 24px}
+.figs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:24px}
+@media (max-width:760px){.figs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.fig{background:var(--bg2);padding:20px 18px;display:grid;gap:4px;min-width:0}
+.fig b{font-family:var(--f-display);font-weight:400;font-size:clamp(36px,5vw,58px);line-height:1}
+.fig span{color:var(--muted);font-size:13px}
+
+/* ── 쇼릴 벽 */
+.reels{padding-block:48px 24px}
+.reels-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px}
+.filters{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:20px;align-items:center}
+.pills{display:flex;flex-wrap:wrap;gap:4px;background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:3px}
+.pills button{border:0;background:none;padding:5px 12px;border-radius:999px;font-size:13px;color:var(--muted);cursor:pointer}
+.pills button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.count{font-family:var(--f-mono);font-size:12px;color:var(--muted);margin-left:auto}
+.wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:20px}
+.tile{position:relative;aspect-ratio:16/9;max-width:100%;border-radius:8px;overflow:hidden;background:var(--bg3);cursor:pointer;border:0;padding:0;text-align:left;isolation:isolate;transform-style:preserve-3d}
+.tile.big{grid-column:span 2;grid-row:span 2}
+@media (max-width:640px){.tile.big{grid-column:auto;grid-row:auto}}
+.tile img,.tile video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.tile video{opacity:0;transition:opacity .25s}
+.tile.playing video{opacity:1}
+.tile::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,11,16,0) 40%,rgba(10,11,16,.9) 100%);z-index:1}
+.tile .meta{position:absolute;z-index:2;left:0;right:0;bottom:0;padding:12px 14px;display:grid;gap:2px}
+.tile .nm{font-family:var(--f-display);font-weight:400;font-size:clamp(18px,1.8vw,24px);line-height:1.1}
+.tile.big .nm{font-size:clamp(24px,3vw,40px)}
+.tile .ds{font-size:12px;color:rgba(243,242,238,.75);display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.tile .tag{position:absolute;z-index:2;top:10px;left:10px;display:flex;gap:6px}
+.tile .tag span,.tile .dur{font-family:var(--f-mono);font-size:11px;padding:2px 7px;border-radius:4px;background:rgba(10,11,16,.7);color:var(--ink)}
+.tile .dur{position:absolute;z-index:2;top:10px;right:10px}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:1px}
+.dot.orig{background:var(--orig)}.dot.synth{background:var(--synth)}.dot.mute{background:var(--muted)}
+.tile:hover{outline:2px solid var(--accent);outline-offset:2px}
+.empty{color:var(--muted)}
+
+/* ── 만드는 법 */
+.how{padding-block:56px 24px}
+.steps{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin-top:24px;counter-reset:s}
+@media (max-width:980px){.steps{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:560px){.steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.step{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:8px;align-content:start;position:relative;overflow:hidden;min-width:0}
+.step .k{font-family:var(--f-mono);font-size:12px;color:var(--accent2)}
+.step b{font-size:16px}
+.step p{margin:0;font-size:13px;color:var(--muted)}
+.step canvas{width:100%;height:48px;display:block}
+
+/* ── 아래 */
+footer{padding-block:48px max(48px,env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);margin-top:48px;color:var(--muted);font-size:13px}
+footer .wrap{display:grid;gap:12px}
+.legend{display:flex;gap:16px;flex-wrap:wrap}
+.owner{background:var(--bg2);border:1px dashed var(--line);border-radius:10px;padding:14px;display:grid;gap:8px}
+.owner form{display:flex;gap:8px;flex-wrap:wrap}
+.owner input{flex:1 1 260px;min-width:0;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:8px 10px;font:inherit}
+
+/* ── 극장 */
+dialog.theater{border:0;padding:0;background:transparent;max-width:min(1200px,96vw);width:100%;color:var(--ink)}
+dialog.theater::backdrop{background:rgba(5,6,9,.9)}
+.th{display:grid;gap:12px}
+.th video{width:100%;aspect-ratio:16/9;background:#000;border-radius:8px;display:block}
+.th-bar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between}
+.th-name{font-family:var(--f-display);font-weight:400;font-size:clamp(24px,3vw,36px);margin:0;line-height:1.1}
+.th-desc{margin:2px 0 0;color:var(--muted)}
+.th-ref{font-size:13px;color:var(--muted);margin:0}
+.th-ctl{display:flex;gap:8px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.rec{animation:none}.stage video,.tile video{transition:none}}
+</style>
+</head>
+<body>
+
+
+<nav class="nav" aria-label="바로가기">
+  <div class="wrap">
+    <a class="logo" href="#top"><span class="rec" aria-hidden="true"></span>모션 연습장</a>
+    <div class="nav-links"><a href="#reels">쇼릴</a><a href="#how">만드는 법</a><a id="drive-nav" href="#" target="_blank" rel="noopener" hidden>원본 폴더</a></div>
+  </div>
+</nav>
+
+<header class="hero wrap" id="top">
+  <div class="stage" id="stage">
+    <video id="hero-v" muted playsinline autoplay preload="auto"></video>
+    <div class="corner tl"><span id="hero-reel">REEL 01 / 35</span></div>
+    <div class="corner tr"><span id="hero-tc">00:00:00:00</span></div>
+    <div class="hero-copy">
+      <h1 class="title" id="title" aria-label="모션 연습장"></h1>
+      <p class="tagline">레퍼런스 한 편을 보고, 가상의 제품 광고 한 편을. 코드만으로 그린 서른다섯 편의 모션그래픽입니다.</p>
+      <div class="now">
+        <b id="hero-name">—</b><span class="mono" id="hero-kind"></span>
+        <button class="btn" id="hero-open" type="button">▶ 소리 켜고 보기</button>
+        <button class="btn" id="hero-next" type="button">다음 편 →</button>
+      </div>
+    </div>
+  </div>
+  <div class="scrub" id="scrub" aria-hidden="true"></div>
+  <p class="hero-mobile">레퍼런스 한 편을 보고, 가상의 제품 광고 한 편을. 코드만으로 그린 서른다섯 편의 모션그래픽입니다.</p>
+</header>
+
+<section class="figures wrap" aria-labelledby="fig-h">
+  <div class="eyebrow">By the numbers</div>
+  <h2 class="sec" id="fig-h">350개 중에서 골라, 끝까지 만든 것</h2>
+  <div class="figs">
+    <div class="fig"><b data-n="35">35</b><span>완성한 광고</span></div>
+    <div class="fig"><b id="fig-min">0분</b><span>전체 상영 시간</span></div>
+    <div class="fig"><b data-n="0">0</b><span>영상 생성 AI 크레딧 — 전부 코드</span></div>
+    <div class="fig"><b>30p</b><span>1920×1080 · 박자에 맞춘 컷</span></div>
+  </div>
+</section>
+
+<section class="reels wrap" id="reels" aria-labelledby="reels-h">
+  <div class="reels-head">
+    <div><div class="eyebrow">Reels</div><h2 class="sec" id="reels-h">쇼릴 벽</h2></div>
+    <p style="margin:0;color:var(--muted);max-width:42ch">마우스를 올리면 미리보기가 돌고, 누르면 큰 화면으로 열립니다.</p>
+  </div>
+  <div class="filters">
+    <div class="pills" id="f-kind" role="group" aria-label="갈래"></div>
+    <div class="pills" id="f-music" role="group" aria-label="음악"></div>
+    <span class="count" id="f-count"></span>
+  </div>
+  <div class="wall" id="wall"></div>
+</section>
+
+<section class="how wrap" id="how" aria-labelledby="how-h">
+  <div class="eyebrow">Process</div>
+  <h2 class="sec" id="how-h">한 편이 만들어지는 순서</h2>
+  <div class="steps" id="steps"></div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="legend"><span><i class="dot synth"></i>합성곡 — 코드로 직접 만든 곡</span><span><i class="dot mute"></i>무음 — 음악을 새로 만드는 중</span></div>
+    <span>모든 제품·브랜드는 가상입니다. 실존 회사의 광고가 아닙니다.</span>
+    <a class="btn solid" id="drive-foot" href="#" target="_blank" rel="noopener" hidden style="justify-self:start">원본 고화질 폴더 열기</a>
+    <div class="owner" id="owner" hidden>
+      <b>소유자 설정</b>
+      <span>구글 드라이브 <span class="mono">완성_영상</span> 폴더 공유 링크를 넣으면 「원본 폴더」 버튼이 모두에게 보입니다.</span>
+      <form id="drive-form"><input id="drive-input" type="url" placeholder="https://drive.google.com/drive/folders/…" aria-label="드라이브 폴더 링크"><button class="btn" type="submit">저장</button></form>
+      <span id="drive-msg"></span>
+      <span>참고 영상 표시는 공유 메뉴에서 참여자(Contributor) 이상 권한을 준 사람에게만 보입니다.</span>
+    </div>
+  </div>
+</footer>
+
+<dialog class="theater" id="theater" aria-label="재생">
+  <div class="th">
+    <video id="th-v" controls playsinline preload="auto"></video>
+    <div class="th-bar">
+      <div style="min-width:0">
+        <h3 class="th-name" id="th-name"></h3>
+        <p class="th-desc" id="th-desc"></p>
+        <p class="th-ref" id="th-ref" hidden></p>
+      </div>
+      <div class="th-ctl">
+        <button class="btn" id="th-prev" type="button">← 이전</button>
+        <button class="btn" id="th-next" type="button">다음 →</button>
+        <button class="btn" id="th-close" type="button">닫기 ✕</button>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<script>
+const ITEMS = [{"id": "v17", "dur": 20.0, "name": "BYTE", "desc": "고교 코딩 동아리 모집 — 거리 포스터 같은 아이덴티티 범퍼", "kind": "브랜드", "batch": 1, "music": "합성"}, {"id": "v04", "dur": 14.06, "name": "공부메이트", "desc": "공부 시간 관리 앱 — 버튼 하나가 끊김 없이 타이머·그래프·검색으로 변신", "kind": "앱", "batch": 1, "music": "무음"}, {"id": "v07", "dur": 16.26, "name": "냠냠콜", "desc": "음식 주문 앱 — 한 테이크 런칭 필름, 냄비에서 번지는 주황", "kind": "서비스", "batch": 1, "music": "무음"}, {"id": "v13", "dur": 15.0, "name": "모닝빈", "desc": "동네 카페 「오늘의 첫 잔」 — 박마다 터지는 키네틱 타이포", "kind": "브랜드", "batch": 1, "music": "무음"}, {"id": "v15", "dur": 9.0, "name": "모아", "desc": "청소년 용돈 저축 앱 — 유리 카드와 잔액 카운트업, 주인공으로 다가가는 카메라", "kind": "앱", "batch": 1, "music": "합성"}, {"id": "v01", "dur": 20.0, "name": "생각하는 AI 교실", "desc": "AI 원리 수업 — 확률 막대가 블록으로 부서졌다 답으로 조립", "kind": "설명", "batch": 1, "music": "합성"}, {"id": "v22", "dur": 15.0, "name": "스튜디오 결", "desc": "모션 디자인 스튜디오 쇼릴 — 장면마다 다른 기법", "kind": "브랜드", "batch": 1, "music": "무음"}, {"id": "v27", "dur": 15.0, "name": "클립봇", "desc": "AI 숏폼 편집 도구 — 영상 터널과 휴대폰 줄", "kind": "새 소식", "batch": 1, "music": "무음"}, {"id": "v31", "dur": 13.6, "name": "픽셀 마법학교", "desc": "도트 RPG 사전 예약 — 주문을 모아 성에 불을 켜는 마법사", "kind": "그 밖", "batch": 1, "music": "합성"}, {"id": "v32", "dur": 30.0, "name": "하루노트", "desc": "플래너 앱 — 오늘의 요일에 착지하는 30초 타이포", "kind": "브랜드", "batch": 1, "music": "무음"}, {"id": "v02", "dur": 28.0, "name": "AI 놀이터", "desc": "AI 캠프 — 픽셀로 그린 신경망 학습", "kind": "설명", "batch": 2, "music": "합성"}, {"id": "v03", "dur": 29.0, "name": "걸다.", "desc": "액자 인화 서비스 — 애플풍 한 테이크, 화면 속 한 장을 벽에", "kind": "새 소식", "batch": 2, "music": "무음"}, {"id": "v05", "dur": 29.05, "name": "그림체", "desc": "화풍 변환 앱 — 여섯 화풍을 건너는 로봇", "kind": "그 밖", "batch": 2, "music": "무음"}, {"id": "v06", "dur": 15.0, "name": "글자공방", "desc": "한글 타이포 스튜디오 — 자모가 조립되는 11,172자", "kind": "브랜드", "batch": 2, "music": "무음"}, {"id": "v08", "dur": 19.2, "name": "달려 픽셀", "desc": "러닝 액션 게임 — 무지개 트랙 위 아슬아슬한 회피", "kind": "그 밖", "batch": 2, "music": "합성"}, {"id": "v09", "dur": 15.0, "name": "들림", "desc": "팟캐스트 앱 — 표지 터널과 출근길 파형", "kind": "새 소식", "batch": 2, "music": "무음"}, {"id": "v10", "dur": 15.0, "name": "레이어스", "desc": "브랜드 디자인 에이전시 — 겹을 쌓는 단면 3D", "kind": "브랜드", "batch": 2, "music": "무음"}, {"id": "v11", "dur": 14.5, "name": "루미", "desc": "AI 비서 — 판화풍 그림이 빠르게 바뀌는 밝은 광고", "kind": "브랜드", "batch": 2, "music": "무음"}, {"id": "v12", "dur": 20.0, "name": "맡겨봐", "desc": "할 일 정리 비서 — 쪽지 더미에서 벗어나는 단편", "kind": "설명", "batch": 2, "music": "합성"}, {"id": "v14", "dur": 20.0, "name": "모션 연습장", "desc": "연습 채널 쇼릴 — 1차 완성작 10편을 실제 클립으로", "kind": "브랜드", "batch": 2, "music": "무음"}, {"id": "v16", "dur": 30.0, "name": "모음함", "desc": "영감 보드 앱 — 흩어진 이미지가 별자리처럼 이어짐", "kind": "브랜드", "batch": 2, "music": "합성"}, {"id": "v18", "dur": 23.94, "name": "밤사이.", "desc": "업무 자동화 비서 — 마침표 속에서 밤이 새벽이 되는 루프", "kind": "새 소식", "batch": 2, "music": "무음"}, {"id": "v19", "dur": 14.06, "name": "버블톡", "desc": "메신저 앱 — 한 도형의 변신과 박마다 바뀌는 큰 낱말", "kind": "앱", "batch": 2, "music": "무음"}, {"id": "v20", "dur": 17.0, "name": "보물섬 키우기", "desc": "모바일 게임 — 상자 승급, 폭발, 전설 카드 공개", "kind": "앱", "batch": 2, "music": "합성"}, {"id": "v21", "dur": 30.0, "name": "생각하는 기계展", "desc": "AI 역사 전시 — 토큰 하나가 다섯 시대를 관통", "kind": "설명", "batch": 2, "music": "합성"}, {"id": "v23", "dur": 16.26, "name": "오늘반찬", "desc": "반찬 정기배송 앱 — 도시락에 반찬이 담기는 런칭 필름", "kind": "서비스", "batch": 2, "music": "무음"}, {"id": "v24", "dur": 15.0, "name": "온에어", "desc": "방송부 모집 쇼릴 — 녹화 화면 속 도형과 점 글자", "kind": "브랜드", "batch": 2, "music": "무음"}, {"id": "v25", "dur": 15.0, "name": "책숲", "desc": "동네 작은 도서관 「오늘, 한 권」 — 책장 넘김 타이포", "kind": "브랜드", "batch": 2, "music": "무음"}, {"id": "v26", "dur": 25.5, "name": "큐브랩", "desc": "3D 모션 스튜디오 쇼릴 — 철사 큐브부터 매듭까지", "kind": "브랜드", "batch": 2, "music": "무음"}, {"id": "v28", "dur": 16.6, "name": "파도", "desc": "음악 앱 — 32박 리퀴드 글래스 UI", "kind": "앱", "batch": 2, "music": "무음"}, {"id": "v29", "dur": 26.0, "name": "플로우", "desc": "AI 추론 클라우드 — 줄 서던 요청이 흐름이 되기까지", "kind": "새 소식", "batch": 2, "music": "무음"}, {"id": "v30", "dur": 15.0, "name": "한 번 더 확인", "desc": "보이스피싱 예방 공익 캠페인 — 글자 없는 네 컷 은유", "kind": "설명", "batch": 2, "music": "합성"}, {"id": "v35", "dur": 20.4, "name": "한 페이지", "desc": "자서전 기록 앱 — 작은 물건들이 한 사람이 되기까지", "kind": "그 밖", "batch": 2, "music": "합성"}, {"id": "v33", "dur": 30.0, "name": "한잔레시피", "desc": "홈카페 레시피 앱 — 무알코올 자몽 에이드 30초 해설", "kind": "설명", "batch": 2, "music": "합성"}, {"id": "v34", "dur": 15.0, "name": "한줄일기", "desc": "하루 한 줄 일기 앱 — 앱 화면을 부품으로 쪼갠 소개", "kind": "서비스", "batch": 2, "music": "무음"}];
+const VIDS = {};
+const FEATURED = ["v10", "v20", "v12", "v13", "v06", "v04", "v08", "v03", "v35", "v26", "v32", "v05"];
+const BIG = ["v10", "v20", "v12"];
+const $ = s => document.querySelector(s);
+const ML = { '원곡': ['orig', '원곡'], '합성': ['synth', '합성곡'], '무음': ['mute', '무음'] };
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const media = (id, k) => (VIDS[id] && VIDS[id][k]) ? '/_blob/' + VIDS[id][k] : 'media/' + id + (k === 'v' ? '.mp4' : '.jpg');
+const byId = id => ITEMS.find(i => i.id === id);
+const pad = n => String(n).padStart(2, '0');
+const tcode = t => { const s = Math.floor(t); return '00:' + pad(Math.floor(s / 60)) + ':' + pad(s % 60) + ':' + pad(Math.floor((t % 1) * 30)); };
+const mmss = t => Math.floor(t / 60) + ':' + pad(Math.round(t % 60));
+
+/* ── 반응하는 제목: 글자마다 스프링 */
+const title = $('#title'); const glyphs = [];
+[...'모션 연습장'].forEach(ch => {
+  if (ch === ' ') { const s = document.createElement('span'); s.className = 'sp'; title.appendChild(s); return; }
+  const g = document.createElement('span'); g.className = 'g'; g.textContent = ch; g.setAttribute('aria-hidden', 'true');
+  title.appendChild(g); glyphs.push({ el: g, x: 0, y: 0, r: 0, vx: 0, vy: 0, vr: 0, tx: 0, ty: 0, tr: 0 });
+});
+let px = -9999, py = -9999;
+if (!RM) {
+  addEventListener('pointermove', e => { px = e.clientX; py = e.clientY; }, { passive: true });
+  (function tick(){
+    glyphs.forEach((g, i) => {
+      const b = g.el.getBoundingClientRect(); const cx = b.left + b.width / 2 - g.x, cy = b.top + b.height / 2 - g.y;
+      const dx = cx - px, dy = cy - py, d = Math.hypot(dx, dy), R = 220;
+      if (d < R) { const f = (1 - d / R); g.tx = dx / (d || 1) * f * 46; g.ty = dy / (d || 1) * f * 46 - f * 10; g.tr = (dx > 0 ? 1 : -1) * f * 12; g.el.style.color = 'var(--accent2)'; }
+      else { g.tx = 0; g.ty = 0; g.tr = 0; g.el.style.color = ''; }
+      // 닫힌 꼴 스프링: 단단하게, 반동 적게
+      const k = .14, damp = .74;
+      g.vx = (g.vx + (g.tx - g.x) * k) * damp; g.vy = (g.vy + (g.ty - g.y) * k) * damp; g.vr = (g.vr + (g.tr - g.r) * k) * damp;
+      g.x += g.vx; g.y += g.vy; g.r += g.vr;
+      g.el.style.transform = `translate(${g.x.toFixed(2)}px,${g.y.toFixed(2)}px) rotate(${g.r.toFixed(2)}deg)`;
+    });
+    requestAnimationFrame(tick);
+  })();
+}
+
+/* ── 히어로 상영: FEATURED 순서로 이어 틀기 */
+const hv = $('#hero-v'), stage = $('#stage'); let hi = 0;
+const scrub = $('#scrub'); FEATURED.forEach(() => scrub.appendChild(document.createElement('i')));
+function heroLoad(k){
+  hi = (k + FEATURED.length) % FEATURED.length; const it = byId(FEATURED[hi]); if (!it) return;
+  stage.classList.add('swap');
+  setTimeout(() => {
+    hv.src = media(it.id, 'v'); hv.poster = media(it.id, 'p'); hv.play().catch(() => {});
+    stage.classList.remove('swap');
+  }, RM ? 0 : 280);
+  $('#hero-name').textContent = it.name; $('#hero-kind').textContent = it.kind + ' · ' + mmss(it.dur);
+  $('#hero-reel').textContent = 'REEL ' + pad(ITEMS.indexOf(it) + 1) + ' / ' + ITEMS.length;
+  [...scrub.children].forEach((b, j) => { b.className = j === hi ? 'cur' : (j < hi ? 'on' : ''); });
+}
+hv.addEventListener('ended', () => heroLoad(hi + 1));
+hv.addEventListener('timeupdate', () => { $('#hero-tc').textContent = tcode(hv.currentTime); });
+$('#hero-next').onclick = () => heroLoad(hi + 1);
+$('#hero-open').onclick = () => openTheater(FEATURED[hi], hv.currentTime);
+scrub.addEventListener('click', e => { const k = [...scrub.children].indexOf(e.target); if (k >= 0) heroLoad(k); });
+scrub.style.cursor = 'pointer'; scrub.removeAttribute('aria-hidden');
+scrub.setAttribute('role', 'group'); scrub.setAttribute('aria-label', '상영 순서');
+
+/* ── 숫자 */
+const total = ITEMS.reduce((a, i) => a + i.dur, 0);
+$('#fig-min').textContent = Math.floor(total / 60) + '분 ' + Math.round(total % 60) + '초';
+
+/* ── 쇼릴 벽 + 필터(FLIP 재배치) */
+let filt = { kind: 'all', music: 'all' };
+const wall = $('#wall'); const tiles = new Map();
+function makeTile(it){
+  const t = document.createElement('button'); t.type = 'button'; t.className = 'tile' + (BIG.includes(it.id) ? ' big' : '');
+  t.setAttribute('aria-label', it.name + ' 재생');
+  const im = document.createElement('img'); im.alt = ''; im.loading = 'lazy'; im.src = media(it.id, 'p');
+  const v = document.createElement('video'); v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'none';
+  const tag = document.createElement('div'); tag.className = 'tag';
+  const k = document.createElement('span'); k.textContent = it.kind; tag.appendChild(k);
+  const m = document.createElement('span'); m.innerHTML = '<i class="dot ' + ML[it.music][0] + '"></i>'; m.append(ML[it.music][1]); tag.appendChild(m);
+  const du = document.createElement('span'); du.className = 'dur'; du.textContent = mmss(it.dur);
+  const meta = document.createElement('div'); meta.className = 'meta';
+  const nm = document.createElement('div'); nm.className = 'nm'; nm.textContent = it.name;
+  const ds = document.createElement('div'); ds.className = 'ds'; ds.textContent = it.desc;
+  meta.append(nm, ds); t.append(im, v, tag, du, meta);
+  const start = () => { if (!v.src) v.src = media(it.id, 'v'); v.play().then(() => t.classList.add('playing')).catch(() => {}); };
+  const stop = () => { v.pause(); t.classList.remove('playing'); t.style.transform = ''; };
+  t.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') start(); });
+  t.addEventListener('pointerleave', stop);
+  t.addEventListener('focus', start); t.addEventListener('blur', stop);
+  if (!RM) t.addEventListener('pointermove', e => {
+    if (e.pointerType !== 'mouse') return; const b = t.getBoundingClientRect();
+    const rx = ((e.clientY - b.top) / b.height - .5) * -6, ry = ((e.clientX - b.left) / b.width - .5) * 8;
+    t.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+  });
+  t.onclick = () => openTheater(it.id, 0);
+  return t;
+}
+ITEMS.forEach(it => tiles.set(it.id, makeTile(it)));
+function list(){ return ITEMS.filter(i => (filt.kind === 'all' || i.kind === filt.kind) && (filt.music === 'all' || i.music === filt.music)); }
+function renderWall(animate){
+  const first = new Map(); if (animate && !RM) tiles.forEach((t, id) => { if (t.isConnected) first.set(id, t.getBoundingClientRect()); });
+  const l = list(); wall.replaceChildren(...l.map(i => tiles.get(i.id)));
+  $('#f-count').textContent = l.length + ' / ' + ITEMS.length + '편';
+  if (!l.length) { const p = document.createElement('p'); p.className = 'empty'; p.textContent = '이 조합에 맞는 편이 없어요. 필터를 하나 풀어 보세요.'; wall.appendChild(p); }
+  if (!animate || RM) return;
+  l.forEach(i => {
+    const t = tiles.get(i.id), a = first.get(i.id), b = t.getBoundingClientRect();
+    if (a) t.animate([{ transform: `translate(${a.left - b.left}px,${a.top - b.top}px) scale(${a.width / b.width})` }, { transform: 'none' }], { duration: 420, easing: 'cubic-bezier(.2,.8,.2,1)' });
+    else t.animate([{ opacity: 0, transform: 'scale(.92)' }, { opacity: 1, transform: 'none' }], { duration: 320, easing: 'cubic-bezier(.2,.8,.2,1)' });
+  });
+}
+function pills(el, key, opts){
+  el.replaceChildren(...opts.map(([v, label]) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.setAttribute('aria-pressed', String(filt[key] === v)); b.onclick = () => { filt[key] = v; pills(el, key, opts); renderWall(true); }; return b; }));
+}
+pills($('#f-kind'), 'kind', [['all', '전체'], ...[...new Set(ITEMS.map(i => i.kind))].map(k => [k, k])]);
+pills($('#f-music'), 'music', [['all', '모든 음악'], ...[...new Set(ITEMS.map(i => i.music))].map(m => [m, ML[m][1]])]);
+renderWall(false);
+
+/* ── 만드는 법: 단계마다 작은 움직임 */
+const STEPS = [
+  ['레퍼런스 고르기', '350개 중 완성도가 검증된 한 편을 고른다.'],
+  ['장면 뜯어보기', '프레임을 잘라 장면·전환·색을 적는다.'],
+  ['박자 재기', '실제 킥을 직접 재서 컷을 박에 건다.'],
+  ['코드로 짓기', 'HTML과 GSAP 타임라인 하나로 그린다.'],
+  ['굽기', 'HyperFrames로 1920×1080 영상을 굽는다.'],
+  ['한 글자씩 점검', '원본 크기 프레임으로 잘림·글자를 본다.'],
+];
+const stepsEl = $('#steps'); const cvs = [];
+STEPS.forEach(([b, p], i) => {
+  const d = document.createElement('div'); d.className = 'step';
+  const k = document.createElement('span'); k.className = 'k'; k.textContent = 'STEP ' + pad(i + 1);
+  const c = document.createElement('canvas'); c.width = 240; c.height = 64; c.setAttribute('aria-hidden', 'true');
+  const bb = document.createElement('b'); bb.textContent = b; const pp = document.createElement('p'); pp.textContent = p;
+  d.append(k, c, bb, pp); stepsEl.appendChild(d); cvs.push(c);
+});
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function drawSteps(t){
+  const A = css('--accent'), I = css('--ink'), L = css('--line');
+  cvs.forEach((c, i) => {
+    const x = c.getContext('2d'); x.clearRect(0, 0, 240, 64);
+    if (i === 0) { for (let j = 0; j < 10; j++) { const on = j === Math.floor(t / 600) % 10; x.fillStyle = on ? A : L; x.fillRect(8 + j * 23, on ? 14 : 22, 18, on ? 36 : 20); } }
+    if (i === 1) { for (let j = 0; j < 4; j++) { x.strokeStyle = j === Math.floor(t / 700) % 4 ? A : L; x.lineWidth = 2; x.strokeRect(8 + j * 58, 14, 50, 36); } }
+    if (i === 2) { const beat = (t % 500) / 500; for (let j = 0; j < 16; j++) { x.fillStyle = j % 4 === 0 ? I : L; x.fillRect(8 + j * 14, 40, 3, j % 4 === 0 ? -22 : -10); } x.fillStyle = A; x.beginPath(); x.arc(8 + (Math.floor(t / 500) % 16) * 14 + 1.5, 46 + 0, 4 + (1 - beat) * 4, 0, 7); x.fill(); }
+    if (i === 3) { const n = Math.floor(t / 120) % 28; x.fillStyle = L; for (let j = 0; j < 4; j++) x.fillRect(8, 12 + j * 12, 210 - j * 30, 5); x.fillStyle = A; x.fillRect(8, 12 + 3 * 12, Math.min(n, 20) * 6, 5); }
+    if (i === 4) { const p = (t % 3000) / 3000; x.fillStyle = L; x.fillRect(8, 28, 224, 8); x.fillStyle = A; x.fillRect(8, 28, 224 * p, 8); x.fillStyle = I; x.font = '11px IBM Plex Mono, monospace'; x.fillText(Math.floor(p * 450) + 'f / 450f', 8, 56); }
+    if (i === 5) { const g = Math.floor(t / 400) % 6; for (let j = 0; j < 6; j++) { x.fillStyle = j === g ? A : L; x.fillRect(8 + j * 38, 16, 30, 30); } x.strokeStyle = I; x.lineWidth = 2; x.strokeRect(6 + g * 38, 14, 34, 34); }
+  });
+}
+if (RM) drawSteps(0); else (function loop(t){ drawSteps(t); requestAnimationFrame(loop); })(0);
+
+/* ── 극장 */
+const th = $('#theater'), tv = $('#th-v'); let tid = null; let refsOK = false, db = null; const refCache = {};
+function openTheater(id, at){
+  const it = byId(id); if (!it) return; tid = id;
+  tv.src = media(id, 'v'); tv.poster = media(id, 'p');
+  tv.addEventListener('loadedmetadata', () => { if (at) tv.currentTime = at; }, { once: true });
+  $('#th-name').textContent = it.name; $('#th-desc').textContent = it.desc + ' · ' + ML[it.music][1] + ' · ' + mmss(it.dur);
+  showRef(id);
+  if (!th.open) { hv.pause(); th.showModal(); }
+  tv.play().catch(() => {});
+  try { history.replaceState(null, '', '#' + id); } catch (e) {}
+}
+function stepTheater(d){ const l = list().length ? list() : ITEMS; const k = l.findIndex(i => i.id === tid); openTheater(l[(k + d + l.length) % l.length].id, 0); }
+$('#th-prev').onclick = () => stepTheater(-1); $('#th-next').onclick = () => stepTheater(1);
+$('#th-close').onclick = () => th.close();
+th.addEventListener('close', () => { tv.pause(); hv.play().catch(() => {}); try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} });
+th.addEventListener('click', e => { if (e.target === th) th.close(); });
+document.addEventListener('keydown', e => { if (!th.open || e.target.closest('input')) return; if (e.key === 'ArrowRight') stepTheater(1); if (e.key === 'ArrowLeft') stepTheater(-1); });
+async function showRef(id){
+  const el = $('#th-ref'); el.hidden = true; if (!refsOK || !db) return;
+  let r = refCache[id]; if (r === undefined) { try { const s = await db.doc('refs/' + id).get(); r = s.exists ? s.data() : null; } catch (e) { r = null; } refCache[id] = r; }
+  if (id !== tid || !r) return;
+  el.textContent = '참고 · ' + r.creator; el.hidden = false;
+}
+
+/* ── 시작 */
+heroLoad(0);
+const h = (location.hash || '').slice(1); if (byId(h)) openTheater(h, 0);
+
+/* ── claude.ai 에서만: 승인자 표시 · 드라이브 링크 (GitHub 판에서는 조용히 건너뜀) */
+(async () => {
+  if (!window.claude || !window.claude.use) return;
+  try { db = await window.claude.use('db'); } catch (e) { db = null; }
+  let user = null; try { user = await window.claude.use('user'); } catch (e) {}
+  if (!db) return;
+  try { const s = await db.doc('refs/_access').get(); refsOK = !!s.exists; } catch (e) { refsOK = false; }
+  if (th.open && tid) showRef(tid);
+  try {
+    db.doc('site/settings').onSnapshot(s => {
+      const u = s.exists ? (s.data().driveUrl || '') : ''; const ok = /^https:\/\/(drive|docs)\.google\.com\//.test(u);
+      ['#drive-nav', '#drive-foot'].forEach(q => { const a = $(q); a.hidden = !ok; if (ok) a.href = u; });
+      if (u && !$('#drive-input').value) $('#drive-input').value = u;
+    }, () => {});
+  } catch (e) {}
+  const can = user ? await user.canEdit().catch(() => false) : false;
+  if (can) {
+    $('#owner').hidden = false;
+    $('#drive-form').addEventListener('submit', async e => {
+      e.preventDefault(); const u = $('#drive-input').value.trim(), m = $('#drive-msg');
+      if (u && !/^https:\/\/(drive|docs)\.google\.com\//.test(u)) { m.textContent = '구글 드라이브 링크(https://drive.google.com/…)를 넣어 주세요.'; return; }
+      try { await db.doc('site/settings').set({ driveUrl: u }); m.textContent = u ? '저장했어요.' : '링크를 지웠어요.'; } catch (err) { m.textContent = '저장하지 못했어요. 편집 권한을 확인해 주세요.'; }
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
